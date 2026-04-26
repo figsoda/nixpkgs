@@ -81,6 +81,8 @@ let
       str
       ;
   };
+
+  json2x = pkgs.callPackage ./formats/json2x/package.nix { };
 in
 optionalAttrs allowAliases aliases
 // rec {
@@ -464,15 +466,13 @@ optionalAttrs allowAliases aliases
           { runCommand, go-toml }:
           runCommand name
             {
-              nativeBuildInputs = [ go-toml ];
+              nativeBuildInputs = [ json2x ];
               value = builtins.toJSON value;
               passAsFile = [ "value" ];
               preferLocalBuild = true;
             }
-            # -use-json-number: preserve JSON ints as TOML ints
-            # (Go's json.Decoder defaults to float64 for all numbers)
             ''
-              jsontoml -use-json-number < "$valuePath" > "$out"
+              json2x toml "$valuePath" "$out"
             ''
         ) { };
 
